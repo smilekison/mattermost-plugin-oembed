@@ -44,16 +44,16 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 	cpuUsage := float64(cpuUsage32)
 	fmt.Println("cpuUsage: ", cpuUsage)
 
-	p.metrics.CPUUsage.With(prometheus.Labels{"cpuUsage": fmt.Sprintf("%f", cpuUsage)}).Inc()
 	url := string(urlBytes)
-	p.metrics.CPUUsage.With(prometheus.Labels{"cpuUsage": fmt.Sprintf("%f", cpuUsage)}).Dec()
 
 	if url == "" {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 	// p.metrics.CPUUsage.With(prometheus.Labels{}).Inc()
+	p.metrics.CPUUsage.With(prometheus.Labels{"cpuUsage": fmt.Sprintf("%f", cpuUsage)}).Inc()
 	resp, err := http.Get(url)
+	p.metrics.CPUUsage.With(prometheus.Labels{"cpuUsage": fmt.Sprintf("%f", cpuUsage)}).Dec()
 
 	if err != nil {
 		fmt.Fprintf(w, "Error getting response from %s\n%s", url, err)
