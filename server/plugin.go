@@ -4,12 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strings"
 	"sync"
-	"time"
-
-	process "github.com/shirou/gopsutil/process"
 
 	// "github.com/mattermost/mattermost-plugin-calls/server/performance"
 	"github.com/mattermost/mattermost-server/v5/plugin"
@@ -29,24 +25,11 @@ type Plugin struct {
 }
 
 func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
+
 	if strings.HasPrefix(r.URL.Path, "/metrics") {
 		p.metrics.Handler().ServeHTTP(w, r)
+		return
 	}
-	pid := int32(os.Getpid())
-	process := process.Process{
-		Pid: pid,
-	}
-	fmt.Println("ProcessID: ", pid)
-
-	memoryUsage32, _ := process.MemoryPercent()
-	memoryUsage := float64(memoryUsage32)
-	fmt.Println("memoryUsage: ", memoryUsage)
-
-	cpuUsage32, _ := process.CPUPercent()
-	cpuUsage := float64(cpuUsage32)
-	fmt.Println("cpuUsage: ", cpuUsage)
-	// }
-
 	urlBytes, _ := ioutil.ReadAll(r.Body)
 	url := string(urlBytes)
 
@@ -54,10 +37,9 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	start := time.Now()
+	// p.metrics.CPUUsage.With(prometheus.Labels{"type": "KVGet"}).Inc()
+	// storedData, appErr := p.API.KVGet(key)
 	resp, err := http.Get(url)
-	elapsed := time.Since(start).Seconds()
-	fmt.Println("Response time:  ", elapsed)
 
 	if err != nil {
 		fmt.Fprintf(w, "Error getting response from %s\n%s", url, err)
@@ -75,4 +57,5 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(respBody)
+
 }
