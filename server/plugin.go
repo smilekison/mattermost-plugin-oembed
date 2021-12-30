@@ -11,7 +11,7 @@ import (
 
 	process "github.com/shirou/gopsutil/process"
 
-	"github.com/mattermost/mattermost-plugin-oembed/server/performance"
+	// "github.com/mattermost/mattermost-plugin-calls/server/performance"
 	"github.com/mattermost/mattermost-server/v5/plugin"
 )
 
@@ -25,17 +25,13 @@ type Plugin struct {
 	// configuration is the active plugin configuration. Consult getConfiguration and
 	// setConfiguration for usage.
 	configuration *configuration
-	metrics       *performance.Metrics
+	metrics       *Metrics
 }
 
 func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(r.URL.Path, "/metrics") {
 		p.metrics.Handler().ServeHTTP(w, r)
 	}
-
-	fmt.Println("This is write ", w)
-	fmt.Println("This is request ", r)
-	// p.metrics.Handler().ServeHTTP(w, r)
 	pid := int32(os.Getpid())
 	process := process.Process{
 		Pid: pid,
