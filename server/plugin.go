@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 
 	// "github.com/mattermost/mattermost-plugin-calls/server/performance"
 	"github.com/mattermost/mattermost-server/v5/plugin"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/shirou/gopsutil/process"
 )
 
 // Plugin implements the interface expected by the Mattermost server to communicate between the server and plugin processes.
@@ -31,14 +34,25 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 		return
 	}
 	urlBytes, _ := ioutil.ReadAll(r.Body)
+
+	pid := int32(os.Getpid())
+	process := process.Process{
+		Pid: pid,
+	}
+
+	cpuUsage32, _ := process.CPUPercent()
+	cpuUsage := float64(cpuUsage32)
+	fmt.Println("cpuUsage: ", cpuUsage)
+
+	p.metrics.CPUUsage.With(prometheus.Labels{"cpuUsage": fmt.Sprintf("%f", cpuUsage)}).Inc()
 	url := string(urlBytes)
+	p.metrics.CPUUsage.With(prometheus.Labels{"cpuUsage": fmt.Sprintf("%f", cpuUsage)}).Dec()
 
 	if url == "" {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	// p.metrics.CPUUsage.With(prometheus.Labels{"type": "KVGet"}).Inc()
-	// storedData, appErr := p.API.KVGet(key)
+	// p.metrics.CPUUsage.With(prometheus.Labels{}).Inc()
 	resp, err := http.Get(url)
 
 	if err != nil {

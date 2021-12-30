@@ -15,8 +15,8 @@ const (
 //Metrics is awesome
 type Metrics struct {
 	registry    *prometheus.Registry
-	CPUUsage    *prometheus.CounterVec
-	MemoryUsage *prometheus.CounterVec
+	CPUUsage    *prometheus.GaugeVec
+	MemoryUsage *prometheus.GaugeVec
 }
 
 //NewMetrics is awesome
@@ -29,21 +29,21 @@ func NewMetrics() *Metrics {
 	}))
 	m.registry.MustRegister(collectors.NewGoCollector())
 
-	m.CPUUsage = prometheus.NewCounterVec(prometheus.CounterOpts{
+	m.CPUUsage = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: metricsNamespace,
 		Name:      "cpu_usage_percent",
 		Help:      "how many percent of the CPU time this process uses",
 	},
-		[]string{"type"},
+		[]string{"cpuUsage"},
 	)
 	m.registry.MustRegister(m.CPUUsage)
 
-	m.MemoryUsage = prometheus.NewCounterVec(prometheus.CounterOpts{
+	m.MemoryUsage = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: metricsNamespace,
 		Name:      "cpu_MemoryUsage_percent",
 		Help:      "how many percent of the Memory this process is using",
 	},
-		[]string{"type"},
+		[]string{"memoryUsage"},
 	)
 	m.registry.MustRegister(m.MemoryUsage)
 	// fmt.Println("This is new message")
