@@ -30,7 +30,7 @@ export default class OEmbed extends Component {
             body: this.oembedUrl,
         };
 
-        fetch(`/plugins/${pluginId}/`, options).
+        fetch(`/mattermost539/plugins/${pluginId}/`, options).
             then((res) => res.json()).
             then((res) => {
                 if (res.html) {

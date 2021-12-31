@@ -28,26 +28,6 @@ func NewMetrics() *Metrics {
 		Namespace: metricsNamespace,
 	}))
 	m.registry.MustRegister(collectors.NewGoCollector())
-
-	m.CPUUsage = prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: metricsNamespace,
-		Name:      "cpu_usage_percent",
-		Help:      "how many percent of the CPU time this process uses",
-	},
-		[]string{"cpuUsage"},
-	)
-	m.registry.MustRegister(m.CPUUsage)
-
-	m.MemoryUsage = prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: metricsNamespace,
-		Name:      "cpu_MemoryUsage_percent",
-		Help:      "how many percent of the Memory this process is using",
-	},
-		[]string{"memoryUsage"},
-	)
-	m.registry.MustRegister(m.MemoryUsage)
-	// fmt.Println("This is new message")
-
 	return &m
 }
 
